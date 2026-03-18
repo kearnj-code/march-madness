@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192">
+  <rect width="192" height="192" rx="32" fill="#003087"/>
+  <!-- Basketball -->
+  <circle cx="96" cy="90" r="46" fill="#E8531C" stroke="#fff" stroke-width="2"/>
+  <path d="M96 44 Q118 68 118 90 Q118 112 96 136" stroke="#fff" stroke-width="2.5" fill="none"/>
+  <path d="M96 44 Q74 68 74 90 Q74 112 96 136" stroke="#fff" stroke-width="2.5" fill="none"/>
+  <path d="M50 90 Q73 80 96 90 Q119 100 142 90" stroke="#fff" stroke-width="2.5" fill="none"/>
+  <!-- Trophy cup suggestion -->
+  <path d="M70 150 Q96 145 122 150 L118 162 Q96 166 74 162 Z" fill="#C9A84C"/>
+  <rect x="90" y="136" width="12" height="14" fill="#C9A84C"/>
+  <rect x="80" y="162" width="32" height="6" rx="2" fill="#C9A84C"/>
+</svg>

@@ -1,0 +1,26 @@
+{
+  "name": "2026 March Madness Bracket",
+  "short_name": "MM Bracket",
+  "description": "Kearns Family Tournament bracket picker for the 2026 NCAA Men's Basketball Championship",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#003087",
+  "theme_color": "#003087",
+  "orientation": "landscape",
+  "icons": [
+    {
+      "src": "icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["sports", "games"],
+  "screenshots": []
+}
