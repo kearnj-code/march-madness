@@ -167,8 +167,7 @@
     display: flex;
     flex-direction: column;
   }
-  .rounds-col.left-side { flex-direction: row; gap: 0; }
-  .rounds-col.right-side { flex-direction: row-reverse; gap: 0; }
+
 
   .round-col {
     display: flex;
@@ -495,7 +494,12 @@
     gap: 0;
     align-items: stretch;
   }
-  .right-side .rounds-row { flex-direction: row-reverse; }
+  /* Right-side regions (South, Midwest): reverse column order so R64 is at the far right */
+  .rounds-row.right-side { flex-direction: row-reverse; }
+  /* Flip team slot content so seed is on the right, name on the left */
+  .right-side .team-slot { flex-direction: row-reverse; }
+  .right-side .round-header { text-align: right; }
+  .right-side .region-header { text-align: right; }
 
   /* ── Score bar ── */
   .score-bar {
