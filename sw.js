@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mm-bracket-v2';
+const CACHE_NAME = 'mm-bracket-v3';
 const ASSETS = [
   './',
   './index.html',

@@ -373,6 +373,69 @@
     color: var(--ncaa-blue);
   }
 
+  /* Champion matchup slots — same row style as FF but with gold for winner */
+  .champion-matchup {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 2px;
+    margin-bottom: 4px;
+  }
+  .champion-matchup .team-slot.champion-winner {
+    background: linear-gradient(135deg, #fffbeb, #fef3c7);
+    border-color: var(--ncaa-gold);
+  }
+  .champion-matchup .team-slot.champion-winner .seed {
+    background: var(--ncaa-gold);
+    color: #1a1a00;
+  }
+  .champion-matchup .team-slot.champion-winner .team-name {
+    font-weight: 900;
+    color: var(--ncaa-blue);
+  }
+
+  .tiebreaker-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 10px;
+    width: 100%;
+  }
+  .tiebreaker-label {
+    font-size: 0.58rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--muted);
+    margin-bottom: 4px;
+    text-align: center;
+  }
+  .tiebreaker-input-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--ncaa-light);
+    border: 2px solid var(--ncaa-gold);
+    border-radius: 6px;
+    padding: 4px 10px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .tiebreaker-input-wrap input {
+    border: none;
+    background: transparent;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--ncaa-blue);
+    outline: none;
+    width: 100%;
+    text-align: center;
+  }
+  .tiebreaker-input-wrap input::placeholder {
+    color: #bbb;
+    font-weight: 400;
+  }
+
   .ff-matchup-area {
     width: 100%;
     margin-top: 8px;
@@ -555,6 +618,13 @@
     .champion-trophy { font-size: 1.6rem !important; margin-bottom: 3px !important; }
     .champion-label { font-size: 0.55rem !important; margin-bottom: 3px !important; }
     .champion-slot { min-height: 30px !important; padding: 3px 8px !important; }
+    .champion-matchup .team-slot { height: 18px !important; }
+    .tiebreaker-area { margin-top: 6px !important; }
+    .tiebreaker-label { font-size: 0.48rem !important; }
+    .tiebreaker-input-wrap { padding: 2px 6px !important; }
+    .tiebreaker-input-wrap input { font-size: 0.75rem !important; -moz-appearance: textfield; }
+    .tiebreaker-input-wrap input::-webkit-outer-spin-button,
+    .tiebreaker-input-wrap input::-webkit-inner-spin-button { -webkit-appearance: none; }
   }
 
   /* ── Modal ── */
@@ -793,6 +863,7 @@ function initState() {
       { teams: [null, null], winner: null }, // West vs South (right FF)
     ],
     championship: { teams: [null, null], winner: null },
+    tiebreakerScore: '',
   };
   REGIONS.forEach(region => {
     state.regions[region] = [
@@ -1007,28 +1078,48 @@ function buildFinalFourHTML() {
   champArea.className = 'champion-area';
   champArea.innerHTML = '<div class="champion-trophy">🏆</div><div class="champion-label">2026 Champion</div>';
 
-  const champSlot = document.createElement('div');
-  champSlot.className = 'champion-slot';
-  champSlot.dataset.type = 'champion';
-  champSlot.dataset.slot = '0';
-
   const champ = state.championship;
-  if (champ.winner !== null && champ.teams[champ.winner]) {
-    const t = champ.teams[champ.winner];
-    champSlot.innerHTML = `<div class="seed" style="background:var(--ncaa-gold);color:#1a1a00">${t[0]}</div><span style="font-size:1.1rem">${showMascots ? t[2] : ''}</span><div class="team-name" style="font-size:0.78rem;font-weight:900;color:var(--ncaa-blue)">${t[1]}</div>`;
+  const hasFinalists = champ.teams[0] || champ.teams[1];
+
+  if (hasFinalists) {
+    // Show both finalists as clickable slots
+    const matchupDiv = document.createElement('div');
+    matchupDiv.className = 'champion-matchup';
+    [0, 1].forEach(i => {
+      const t = champ.teams[i];
+      const slot = document.createElement('div');
+      const isWinner = champ.winner === i;
+      slot.className = 'team-slot' + (isWinner ? ' winner champion-winner' : '') + (!t ? ' empty placeholder' : '');
+      slot.dataset.type = 'champion';
+      slot.dataset.slot = String(i);
+      if (t) {
+        slot.dataset.teamname = t[1];
+        slot.innerHTML = `<div class="seed">${t[0]}</div>${showMascots ? `<span class="mascot-emoji">${t[2]}</span>` : ''}<div class="team-name">${t[1]}</div>`;
+      } else {
+        slot.innerHTML = `<div class="team-name" style="color:var(--muted)">TBD</div>`;
+      }
+      matchupDiv.appendChild(slot);
+    });
+    champArea.appendChild(matchupDiv);
   } else {
-    const empty = state.championship.teams.some(t => t !== null);
-    if (state.championship.teams[0] || state.championship.teams[1]) {
-      // show both contenders
-      const t0 = state.championship.teams[0];
-      const t1 = state.championship.teams[1];
-      champSlot.innerHTML = `<div class="team-name" style="font-size:0.7rem;color:var(--muted);text-align:center">${t0 ? t0[1] : 'TBD'} vs ${t1 ? t1[1] : 'TBD'}</div>`;
-    } else {
-      champSlot.innerHTML = '<div class="team-name" style="color:var(--muted);text-align:center">Champion TBD</div>';
-    }
+    const emptySlot = document.createElement('div');
+    emptySlot.className = 'champion-slot';
+    emptySlot.innerHTML = '<div class="team-name" style="color:var(--muted);text-align:center">Champion TBD</div>';
+    champArea.appendChild(emptySlot);
   }
 
-  champArea.appendChild(champSlot);
+  // Tiebreaker score input (always shown)
+  const tbArea = document.createElement('div');
+  tbArea.className = 'tiebreaker-area';
+  tbArea.innerHTML = `<div class="tiebreaker-label">Tiebreaker: Predicted Total Score</div>
+    <div class="tiebreaker-input-wrap">
+      <input id="tiebreakerInput" type="number" min="0" max="300" placeholder="e.g. 145"
+        value="${state.tiebreakerScore}"
+        oninput="state.tiebreakerScore = this.value"
+        onclick="event.stopPropagation()">
+    </div>`;
+  champArea.appendChild(tbArea);
+
   col.appendChild(champArea);
 
   // FF Game 2 (West vs South winner)
@@ -1119,8 +1210,16 @@ function handleSlotClick(e) {
     const slot = parseInt(el.dataset.slot);
     advanceFFTeam(ffIdx, slot);
   } else if (type === 'champion') {
-    // toggle champion
+    const slot = parseInt(el.dataset.slot);
+    advanceChampTeam(slot);
   }
+}
+
+function advanceChampTeam(slot) {
+  const champ = state.championship;
+  if (!champ.teams[slot]) return;
+  champ.winner = (champ.winner === slot) ? null : slot;
+  render();
 }
 
 function advanceTeam(region, round, matchupIdx, slot) {
