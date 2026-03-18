@@ -462,10 +462,51 @@
   }
   .tooltip.visible { opacity: 1; }
 
+  /* ── Name banner ── */
+  .name-banner {
+    display: none;
+    background: var(--ncaa-blue);
+    color: var(--ncaa-gold);
+    text-align: center;
+    padding: 5px 12px;
+    font-size: 1rem;
+    font-weight: 900;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    border-top: 2px solid var(--ncaa-gold);
+  }
+  .name-banner.has-name { display: block; }
+
+  .name-input-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--ncaa-light);
+    border: 2px solid var(--ncaa-blue);
+    border-radius: 6px;
+    padding: 4px 10px;
+  }
+  .name-input-wrap label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--ncaa-blue);
+    white-space: nowrap;
+  }
+  .name-input-wrap input {
+    border: none;
+    background: transparent;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text);
+    outline: none;
+    width: 140px;
+  }
+
   /* ── Print styles ── */
   @media print {
     body { background: white; }
     .toolbar, .score-bar { display: none !important; }
+    .name-banner { display: block !important; }
     .bracket-wrapper { padding: 4px; }
     .bracket-grid { min-width: unset; width: 100%; }
     * { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
@@ -551,11 +592,17 @@
 <div class="header">
   <div class="header-inner">
     <h1>2026 NCAA <span>March Madness</span> Bracket</h1>
-    <p>Men's Basketball Championship &bull; 68 Teams</p>
+    <p>Kearns Family Tournament &bull; Men's Basketball Championship &bull; 68 Teams</p>
   </div>
 </div>
 
+<div class="name-banner" id="nameBanner"></div>
+
 <div class="toolbar">
+  <div class="name-input-wrap">
+    <label for="playerName">👤 Your Name:</label>
+    <input type="text" id="playerName" placeholder="Enter first name..." maxlength="30" oninput="updateName(this.value)">
+  </div>
   <button class="btn btn-gold" onclick="randomizeBracket()">🎲 Random Bracket</button>
   <button class="btn btn-primary" onclick="window.print()">🖨️ Print / Save PDF</button>
   <button class="btn btn-outline" onclick="resetBracket()">↺ Reset</button>
@@ -1340,6 +1387,21 @@ document.addEventListener('contextmenu', (e) => {
 document.getElementById('teamModal').addEventListener('click', (e) => {
   if (e.target === document.getElementById('teamModal')) closeModal();
 });
+
+// ════════════════════════════════════════════════
+//  NAME BANNER
+// ════════════════════════════════════════════════
+function updateName(val) {
+  const banner = document.getElementById('nameBanner');
+  const trimmed = val.trim();
+  if (trimmed) {
+    banner.textContent = `${trimmed}'s Bracket`;
+    banner.classList.add('has-name');
+  } else {
+    banner.textContent = '';
+    banner.classList.remove('has-name');
+  }
+}
 
 // ════════════════════════════════════════════════
 //  INIT
