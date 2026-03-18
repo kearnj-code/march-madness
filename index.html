@@ -504,22 +504,47 @@
 
   /* ── Print styles ── */
   @media print {
-    body { background: white; }
-    .toolbar, .score-bar { display: none !important; }
-    .name-banner { display: block !important; }
-    .bracket-wrapper { padding: 4px; }
-    .bracket-grid { min-width: unset; width: 100%; }
-    * { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
     @page {
-      size: landscape;
-      margin: 0.4in;
+      size: letter landscape;
+      margin: 0.2in;
     }
-    .team-slot { height: 22px !important; }
-    .team-name { font-size: 0.6rem !important; }
-    .seed { font-size: 0.55rem !important; min-width: 14px !important; height: 14px !important; }
-    .mascot-emoji { font-size: 0.75rem !important; }
-    .round-col { min-width: 120px !important; }
-    .round-col.r64 { min-width: 128px !important; }
+
+    * { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+
+    body { background: white; zoom: 0.6; }
+
+    .toolbar, .score-bar, .bracket-title-bar, .modal-overlay { display: none !important; }
+    .name-banner { display: block !important; font-size: 0.8rem !important; padding: 4px 10px !important; }
+
+    /* Compact header */
+    .header-inner { padding: 8px 16px 6px !important; }
+    .header h1 { font-size: 1.3rem !important; letter-spacing: 1px !important; }
+    .header p { font-size: 0.65rem !important; margin-top: 2px !important; }
+
+    .bracket-wrapper { padding: 2px; overflow: visible; }
+    .bracket-grid { min-width: unset !important; width: 100%; }
+
+    /* Tighter columns */
+    .round-col { min-width: 96px !important; flex: 1 !important; }
+    .round-col.r64 { min-width: 104px !important; }
+    .final-four-col { min-width: 120px !important; }
+
+    /* Smaller slots */
+    .team-slot { height: 18px !important; margin: 0 !important; }
+    .team-name { font-size: 0.57rem !important; }
+    .seed { font-size: 0.5rem !important; min-width: 12px !important; height: 12px !important; border-radius: 2px !important; }
+    .mascot-emoji { font-size: 0.68rem !important; }
+
+    /* Tighter structure */
+    .matchup { padding: 1px 3px !important; }
+    .round-header { font-size: 0.48rem !important; padding: 2px 0 3px !important; }
+    .region-header { font-size: 0.58rem !important; padding: 3px 4px !important; margin: 0 2px 2px !important; }
+    .ff-header { font-size: 0.5rem !important; padding: 2px 0 3px !important; }
+    .ff-matchup-area { margin: 3px 0 !important; }
+    .champion-area { margin-top: 6px !important; }
+    .champion-trophy { font-size: 1.4rem !important; margin-bottom: 3px !important; }
+    .champion-label { font-size: 0.52rem !important; margin-bottom: 3px !important; }
+    .champion-slot { min-height: 28px !important; padding: 2px 6px !important; }
   }
 
   /* ── Modal ── */
