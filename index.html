@@ -511,40 +511,43 @@
 
     * { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
 
-    body { background: white; zoom: 0.6; }
+    /* zoom: 0.82 makes the full bracket (~1120px CSS wide) render at ~918px physical,
+       fitting within the ~1018px printable width and leaving room to center. */
+    body { background: white; zoom: 0.82; }
 
     .toolbar, .score-bar, .bracket-title-bar, .modal-overlay { display: none !important; }
-    .name-banner { display: block !important; font-size: 0.8rem !important; padding: 4px 10px !important; }
+    .name-banner { display: block !important; font-size: 0.85rem !important; padding: 4px 12px !important; }
 
     /* Compact header */
     .header-inner { padding: 8px 16px 6px !important; }
     .header h1 { font-size: 1.3rem !important; letter-spacing: 1px !important; }
     .header p { font-size: 0.65rem !important; margin-top: 2px !important; }
 
-    .bracket-wrapper { padding: 2px; overflow: visible; }
-    .bracket-grid { min-width: unset !important; width: 100%; }
+    /* Center the bracket under the full-width header */
+    .bracket-wrapper { padding: 2px; overflow: visible; width: fit-content; margin: 0 auto; }
+    .bracket-grid { min-width: unset !important; width: fit-content !important; }
 
-    /* Tighter columns */
-    .round-col { min-width: 96px !important; flex: 1 !important; }
-    .round-col.r64 { min-width: 104px !important; }
-    .final-four-col { min-width: 120px !important; }
+    /* Moderate column sizes — wide enough to read, narrow enough to fit */
+    .round-col { min-width: 118px !important; flex: 0 0 auto !important; }
+    .round-col.r64 { min-width: 130px !important; }
+    .final-four-col { min-width: 150px !important; }
 
-    /* Smaller slots */
-    .team-slot { height: 18px !important; margin: 0 !important; }
-    .team-name { font-size: 0.57rem !important; }
-    .seed { font-size: 0.5rem !important; min-width: 12px !important; height: 12px !important; border-radius: 2px !important; }
-    .mascot-emoji { font-size: 0.68rem !important; }
+    /* Slightly smaller slots to reduce height */
+    .team-slot { height: 20px !important; margin: 0 !important; }
+    .team-name { font-size: 0.6rem !important; }
+    .seed { font-size: 0.52rem !important; min-width: 13px !important; height: 13px !important; border-radius: 2px !important; }
+    .mascot-emoji { font-size: 0.72rem !important; }
 
     /* Tighter structure */
-    .matchup { padding: 1px 3px !important; }
-    .round-header { font-size: 0.48rem !important; padding: 2px 0 3px !important; }
-    .region-header { font-size: 0.58rem !important; padding: 3px 4px !important; margin: 0 2px 2px !important; }
-    .ff-header { font-size: 0.5rem !important; padding: 2px 0 3px !important; }
-    .ff-matchup-area { margin: 3px 0 !important; }
-    .champion-area { margin-top: 6px !important; }
-    .champion-trophy { font-size: 1.4rem !important; margin-bottom: 3px !important; }
-    .champion-label { font-size: 0.52rem !important; margin-bottom: 3px !important; }
-    .champion-slot { min-height: 28px !important; padding: 2px 6px !important; }
+    .matchup { padding: 1px 4px !important; }
+    .round-header { font-size: 0.5rem !important; padding: 2px 0 4px !important; }
+    .region-header { font-size: 0.6rem !important; padding: 3px 6px !important; margin: 0 2px 3px !important; }
+    .ff-header { font-size: 0.52rem !important; padding: 2px 0 3px !important; }
+    .ff-matchup-area { margin: 4px 0 !important; }
+    .champion-area { margin-top: 8px !important; }
+    .champion-trophy { font-size: 1.6rem !important; margin-bottom: 3px !important; }
+    .champion-label { font-size: 0.55rem !important; margin-bottom: 3px !important; }
+    .champion-slot { min-height: 30px !important; padding: 3px 8px !important; }
   }
 
   /* ── Modal ── */
