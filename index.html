@@ -1,0 +1,1353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026 NCAA March Madness Bracket</title>
+<style>
+  :root {
+    --ncaa-blue: #003087;
+    --ncaa-gold: #C9A84C;
+    --ncaa-light: #E8F0FE;
+    --win-green: #1a7a3a;
+    --line-color: #003087;
+    --bg: #f0f4f8;
+    --card-bg: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #d1d5db;
+    --region-colors: #003087, #8B0000, #1a5c1a, #7B2D8B;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Arial', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  .header {
+    background: linear-gradient(135deg, var(--ncaa-blue) 0%, #001a4d 100%);
+    color: white;
+    padding: 0;
+    text-align: center;
+    border-bottom: 4px solid var(--ncaa-gold);
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(ellipse at center, rgba(201,168,76,0.1) 0%, transparent 60%);
+  }
+  .header-inner {
+    position: relative;
+    padding: 18px 24px 14px;
+  }
+  .header h1 {
+    font-size: 2rem;
+    font-weight: 900;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  }
+  .header h1 span { color: var(--ncaa-gold); }
+  .header p {
+    font-size: 0.85rem;
+    opacity: 0.8;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-top: 3px;
+  }
+
+  /* ── Toolbar ── */
+  .toolbar {
+    background: white;
+    border-bottom: 2px solid var(--border);
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 18px;
+    border-radius: 6px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .btn-primary {
+    background: var(--ncaa-blue);
+    color: white;
+  }
+  .btn-primary:hover { background: #001a4d; transform: translateY(-1px); }
+  .btn-gold {
+    background: var(--ncaa-gold);
+    color: #1a1a00;
+  }
+  .btn-gold:hover { background: #b8972e; transform: translateY(-1px); }
+  .btn-outline {
+    background: white;
+    color: var(--ncaa-blue);
+    border: 2px solid var(--ncaa-blue);
+  }
+  .btn-outline:hover { background: var(--ncaa-light); }
+  .btn-danger {
+    background: #dc2626;
+    color: white;
+  }
+  .btn-danger:hover { background: #b91c1c; }
+
+  /* ── Bracket container ── */
+  .bracket-wrapper {
+    padding: 16px;
+    overflow-x: auto;
+  }
+
+  .bracket-title-bar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .bracket-title-bar h2 {
+    font-size: 1.1rem;
+    color: var(--ncaa-blue);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-weight: 900;
+  }
+
+  /* ── Main bracket grid ── */
+  .bracket-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto 1fr 1fr;
+    gap: 0;
+    min-width: 1200px;
+    align-items: start;
+  }
+
+  /* Region label */
+  .region-label {
+    text-align: center;
+    font-size: 0.7rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    padding: 4px 0 8px;
+    border-bottom: 3px solid currentColor;
+    margin-bottom: 8px;
+  }
+
+  /* ── Rounds column ── */
+  .rounds-col {
+    display: flex;
+    flex-direction: column;
+  }
+  .rounds-col.left-side { flex-direction: row; gap: 0; }
+  .rounds-col.right-side { flex-direction: row-reverse; gap: 0; }
+
+  .round-col {
+    display: flex;
+    flex-direction: column;
+    min-width: 150px;
+  }
+  .round-col.r64 { min-width: 158px; }
+  .round-col.r32 { min-width: 150px; }
+  .round-col.s16 { min-width: 150px; }
+  .round-col.e8  { min-width: 150px; }
+
+  .round-header {
+    font-size: 0.6rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--ncaa-blue);
+    text-align: center;
+    padding: 3px 0 6px;
+    border-bottom: 2px solid var(--ncaa-blue);
+    margin-bottom: 0;
+    white-space: nowrap;
+  }
+
+  /* ── Matchup ── */
+  .matchup {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    padding: 4px 6px;
+  }
+
+  /* connecting lines */
+  .matchup::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    border-right: 2px solid var(--line-color);
+    pointer-events: none;
+  }
+  .right-side .matchup::after {
+    right: auto;
+    left: 0;
+    border-right: none;
+    border-left: 2px solid var(--line-color);
+  }
+
+  /* ── Team slot ── */
+  .team-slot {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    height: 30px;
+    padding: 0 6px;
+    border: 1px solid var(--border);
+    background: white;
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+    border-radius: 3px;
+    margin: 1px 0;
+    user-select: none;
+  }
+  .team-slot:hover:not(.empty):not(.placeholder) {
+    background: var(--ncaa-light);
+    border-color: var(--ncaa-blue);
+    z-index: 2;
+  }
+  .team-slot.winner {
+    background: linear-gradient(90deg, #e8f5e9, #f1f8e9);
+    border-color: var(--win-green);
+    font-weight: 700;
+  }
+  .team-slot.loser {
+    opacity: 0.45;
+    text-decoration: line-through;
+  }
+  .team-slot.empty {
+    background: #f9fafb;
+    border: 1px dashed #d1d5db;
+    cursor: default;
+  }
+  .team-slot.placeholder {
+    background: #f9fafb;
+    border: 1px dashed #d1d5db;
+    cursor: default;
+  }
+  .team-slot.champion {
+    background: linear-gradient(90deg, #fffbeb, #fef3c7);
+    border: 2px solid var(--ncaa-gold);
+    font-weight: 900;
+    font-size: 0.82rem;
+  }
+
+  .seed {
+    font-size: 0.62rem;
+    font-weight: 800;
+    color: white;
+    background: var(--ncaa-blue);
+    border-radius: 3px;
+    min-width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .team-slot.winner .seed { background: var(--win-green); }
+
+  .mascot-emoji {
+    font-size: 0.9rem;
+    flex-shrink: 0;
+    line-height: 1;
+  }
+
+  .team-name {
+    font-size: 0.68rem;
+    font-weight: 600;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    flex: 1;
+    letter-spacing: 0.2px;
+  }
+
+  .team-slot.empty .team-name,
+  .team-slot.placeholder .team-name {
+    color: var(--muted);
+    font-style: italic;
+  }
+
+  /* ── Final Four / Champion center ── */
+  .final-four-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 180px;
+    padding: 0 8px;
+  }
+
+  .ff-header {
+    font-size: 0.62rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--ncaa-gold);
+    text-align: center;
+    padding: 3px 0 6px;
+    border-bottom: 2px solid var(--ncaa-gold);
+    margin-bottom: 0;
+    width: 100%;
+    white-space: nowrap;
+  }
+
+  .champion-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 16px;
+    width: 100%;
+  }
+
+  .champion-trophy {
+    font-size: 2.5rem;
+    text-align: center;
+    margin-bottom: 6px;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+  }
+
+  .champion-label {
+    font-size: 0.65rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--ncaa-gold);
+    margin-bottom: 6px;
+    text-align: center;
+  }
+
+  .champion-slot {
+    width: 100%;
+    min-height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #fffbeb, #fef3c7);
+    border: 2px solid var(--ncaa-gold);
+    border-radius: 6px;
+    gap: 6px;
+    padding: 4px 8px;
+    cursor: pointer;
+  }
+  .champion-slot .seed {
+    background: var(--ncaa-gold);
+    color: #1a1a00;
+    font-weight: 900;
+  }
+  .champion-slot .team-name {
+    font-size: 0.78rem;
+    font-weight: 900;
+    color: var(--ncaa-blue);
+  }
+
+  .ff-matchup-area {
+    width: 100%;
+    margin-top: 8px;
+  }
+
+  /* ── Bracket lines via flex spacers ── */
+  .spacer { flex: 1; }
+
+  /* Round 64: 8 matchups per region, no spacers needed */
+  /* We use CSS grid rows with auto spacing */
+
+  .matchups-list {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+
+  /* spacing for each round */
+  .r64 .matchup { margin: 1px 0; }
+  .r32 .matchup { margin: 2px 0; }
+  .s16 .matchup { margin: 6px 0; }
+  .e8  .matchup { margin: 14px 0; }
+
+  .r64 .team-slot { height: 28px; }
+  .r32 .team-slot { height: 28px; }
+  .s16 .team-slot { height: 28px; }
+  .e8  .team-slot { height: 28px; }
+
+  /* spacers between matchups in later rounds */
+  .matchup-spacer { flex: 1; min-height: 4px; }
+
+  /* ── Region wrapper ── */
+  .region-wrapper {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .region-header {
+    text-align: center;
+    padding: 6px 4px 4px;
+    font-size: 0.72rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: white;
+    border-radius: 4px 4px 0 0;
+    margin: 0 4px 4px;
+  }
+  .region-east  .region-header { background: #003087; }
+  .region-west  .region-header { background: #8B0000; }
+  .region-south .region-header { background: #1a5c1a; }
+  .region-midwest .region-header { background: #7B2D8B; }
+
+  .rounds-row {
+    display: flex;
+    gap: 0;
+  }
+  .right-side .rounds-row { flex-direction: row-reverse; }
+
+  /* ── Score bar ── */
+  .score-bar {
+    background: white;
+    border-top: 2px solid var(--border);
+    padding: 8px 20px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+    font-size: 0.8rem;
+  }
+  .score-item { display: flex; align-items: center; gap: 6px; }
+  .score-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  /* ── Tooltip ── */
+  .tooltip {
+    position: fixed;
+    background: rgba(0,0,0,0.88);
+    color: white;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    pointer-events: none;
+    z-index: 9999;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.1s;
+  }
+  .tooltip.visible { opacity: 1; }
+
+  /* ── Print styles ── */
+  @media print {
+    body { background: white; }
+    .toolbar, .score-bar { display: none !important; }
+    .bracket-wrapper { padding: 4px; }
+    .bracket-grid { min-width: unset; width: 100%; }
+    * { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+    @page {
+      size: landscape;
+      margin: 0.4in;
+    }
+    .team-slot { height: 22px !important; }
+    .team-name { font-size: 0.6rem !important; }
+    .seed { font-size: 0.55rem !important; min-width: 14px !important; height: 14px !important; }
+    .mascot-emoji { font-size: 0.75rem !important; }
+    .round-col { min-width: 120px !important; }
+    .round-col.r64 { min-width: 128px !important; }
+  }
+
+  /* ── Modal ── */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+  }
+  .modal-overlay.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+  .modal {
+    background: white;
+    border-radius: 10px;
+    padding: 24px;
+    max-width: 460px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    transform: scale(0.9);
+    transition: transform 0.2s;
+  }
+  .modal-overlay.open .modal { transform: scale(1); }
+  .modal h3 {
+    font-size: 1.1rem;
+    font-weight: 900;
+    color: var(--ncaa-blue);
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .modal-team-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: var(--ncaa-light);
+    border-radius: 8px;
+    margin-bottom: 16px;
+  }
+  .modal-mascot { font-size: 2.5rem; }
+  .modal-team-name { font-size: 1.1rem; font-weight: 800; color: var(--ncaa-blue); }
+  .modal-team-sub { font-size: 0.8rem; color: var(--muted); }
+  .modal-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .stat-box {
+    padding: 10px;
+    background: #f9fafb;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+  }
+  .stat-label { font-size: 0.65rem; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+  .stat-value { font-size: 1.1rem; font-weight: 900; color: var(--text); }
+  .modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <h1>2026 NCAA <span>March Madness</span> Bracket</h1>
+    <p>Men's Basketball Championship &bull; 68 Teams</p>
+  </div>
+</div>
+
+<div class="toolbar">
+  <button class="btn btn-gold" onclick="randomizeBracket()">🎲 Random Bracket</button>
+  <button class="btn btn-primary" onclick="window.print()">🖨️ Print / Save PDF</button>
+  <button class="btn btn-outline" onclick="resetBracket()">↺ Reset</button>
+  <button class="btn btn-outline" onclick="toggleMascots()">🐾 Toggle Mascots</button>
+</div>
+
+<div class="bracket-wrapper" id="bracketWrapper">
+  <div class="bracket-title-bar">
+    <h2>2026 NCAA Tournament Bracket</h2>
+  </div>
+  <div class="bracket-grid" id="bracketGrid">
+    <!-- Rendered by JS -->
+  </div>
+</div>
+
+<div class="score-bar">
+  <div class="score-item"><span class="score-dot" style="background:#1a7a3a"></span> Winner</div>
+  <div class="score-item"><span class="score-dot" style="background:#9ca3af"></span> Eliminated</div>
+  <div class="score-item"><span class="score-dot" style="background:var(--ncaa-gold)"></span> Champion</div>
+  <div class="score-item" style="color:var(--muted);font-size:0.75rem">Click any team to advance them &bull; Click again to undo</div>
+</div>
+
+<!-- Team info modal -->
+<div class="modal-overlay" id="teamModal">
+  <div class="modal">
+    <h3>Team Info</h3>
+    <div class="modal-team-info">
+      <div class="modal-mascot" id="modalMascot"></div>
+      <div>
+        <div class="modal-team-name" id="modalName"></div>
+        <div class="modal-team-sub" id="modalSub"></div>
+      </div>
+    </div>
+    <div class="modal-stats" id="modalStats"></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal()">Close</button>
+      <button class="btn btn-primary" onclick="advanceFromModal()">Advance Team ▶</button>
+    </div>
+  </div>
+</div>
+
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+// ════════════════════════════════════════════════
+//  2026 NCAA TOURNAMENT TEAMS
+//  Projected field (based on rankings / conference champions)
+// ════════════════════════════════════════════════
+const REGIONS = ['East', 'West', 'South', 'Midwest'];
+const REGION_COLORS = {
+  East: '#003087',
+  West: '#8B0000',
+  South: '#1a5c1a',
+  Midwest: '#7B2D8B',
+};
+
+// Teams: [seed, name, mascot emoji, mascot name, record, kenpom-style rank, conference]
+const TEAMS_BY_REGION = {
+  East: [
+    [1,  'Duke',              '😈', 'Blue Devils',    '31-3',  2,  'ACC'],
+    [2,  'Tennessee',         '🐶', 'Volunteers',     '29-5',  5,  'SEC'],
+    [3,  'Iowa St.',          '🌪️', 'Cyclones',       '28-6',  8,  'Big 12'],
+    [4,  'Marquette',         '🦅', 'Golden Eagles',  '27-7',  11, 'Big East'],
+    [5,  'Michigan St.',      '🐦', 'Spartans',       '25-9',  18, 'Big Ten'],
+    [6,  'Illinois',          '🦅', 'Illini',         '24-10', 22, 'Big Ten'],
+    [7,  'UCLA',              '🐻', 'Bruins',         '22-11', 29, 'Pac-12'],
+    [8,  'Mississippi St.',   '🐶', 'Bulldogs',       '22-12', 36, 'SEC'],
+    [9,  'Baylor',            '🐻', 'Bears',          '22-12', 38, 'Big 12'],
+    [10, 'Northwestern',      '🐱', 'Wildcats',       '21-13', 44, 'Big Ten'],
+    [11, 'Providence',        '🦅', 'Friars',         '22-13', 50, 'Big East'],
+    [12, 'James Madison',     '🐶', 'Dukes',          '27-7',  55, 'Sun Belt'],
+    [13, 'Vermont',           '🐱', 'Catamounts',     '28-6',  68, 'America East'],
+    [14, 'Oakland',           '🦅', 'Golden Grizzlies','25-9', 82, 'Horizon'],
+    [15, 'Long Beach St.',    '🎸', '49ers',          '24-11', 95, 'Big West'],
+    [16, 'Norfolk St.',       '🦅', 'Spartans',       '22-13', 110,'MEAC'],
+  ],
+  West: [
+    [1,  'Kansas',            '🦅', 'Jayhawks',       '30-4',  1,  'Big 12'],
+    [2,  'Auburn',            '🐯', 'Tigers',         '29-5',  4,  'SEC'],
+    [3,  'Wisconsin',         '🦡', 'Badgers',        '27-7',  7,  'Big Ten'],
+    [4,  'Arizona',           '🐱', 'Wildcats',       '27-8',  10, 'Pac-12'],
+    [5,  'Saint Mary\'s',     '🔴', 'Gaels',          '28-6',  16, 'WCC'],
+    [6,  'Texas A&M',         '🐶', 'Aggies',         '24-10', 21, 'SEC'],
+    [7,  'Missouri',          '🐯', 'Tigers',         '23-11', 28, 'SEC'],
+    [8,  'Arkansas',          '🐗', 'Razorbacks',     '22-12', 34, 'SEC'],
+    [9,  'Oklahoma',          '🦅', 'Sooners',        '22-12', 37, 'SEC'],
+    [10, 'Colorado',          '🦬', 'Buffaloes',      '21-13', 43, 'Pac-12'],
+    [11, 'NC State',          '🐺', 'Wolfpack',       '22-13', 49, 'ACC'],
+    [12, 'McNeese St.',       '🐄', 'Cowboys',        '27-7',  58, 'Southland'],
+    [13, 'Samford',           '🐶', 'Bulldogs',       '27-8',  70, 'SoCon'],
+    [14, 'Colgate',           '🔴', 'Raiders',        '26-9',  80, 'Patriot'],
+    [15, 'Montana',           '🐻', 'Grizzlies',      '25-10', 93, 'Big Sky'],
+    [16, 'Holy Cross',        '✝️', 'Crusaders',      '21-14', 112,'Patriot'],
+  ],
+  South: [
+    [1,  'Houston',           '🦁', 'Cougars',        '32-3',  3,  'Big 12'],
+    [2,  'Kentucky',          '🐱', 'Wildcats',       '28-6',  6,  'SEC'],
+    [3,  'Creighton',         '🦅', 'Bluejays',       '26-8',  9,  'Big East'],
+    [4,  'Texas',             '🐂', 'Longhorns',      '25-9',  13, 'Big 12'],
+    [5,  'Gonzaga',           '🐶', 'Bulldogs',       '26-8',  15, 'WCC'],
+    [6,  'Indiana',           '🏀', 'Hoosiers',       '23-11', 23, 'Big Ten'],
+    [7,  'Dayton',            '🔴', 'Flyers',         '24-10', 27, 'Atlantic 10'],
+    [8,  'Florida St.',       '🦅', 'Seminoles',      '21-13', 33, 'ACC'],
+    [9,  'TCU',               '🐸', 'Horned Frogs',   '22-12', 40, 'Big 12'],
+    [10, 'Utah St.',          '🏔️', 'Aggies',         '22-12', 46, 'MWC'],
+    [11, 'Pittsburgh',        '🐆', 'Panthers',       '22-13', 51, 'ACC'],
+    [12, 'New Mexico',        '🐺', 'Lobos',          '26-8',  56, 'MWC'],
+    [13, 'Yale',              '🐶', 'Bulldogs',       '23-10', 65, 'Ivy'],
+    [14, 'South Dakota St.', '🐰', 'Jackrabbits',    '26-9',  79, 'Summit'],
+    [15, 'Longwood',          '🌲', 'Lancers',        '24-11', 96, 'Big South'],
+    [16, 'Alabama St.',       '🐝', 'Hornets',        '21-14', 115,'SWAC'],
+  ],
+  Midwest: [
+    [1,  'UConn',             '🐶', 'Huskies',        '31-4',  1,  'Big East'],
+    [2,  'Alabama',           '🐘', 'Crimson Tide',   '28-6',  3,  'SEC'],
+    [3,  'Purdue',            '🚂', 'Boilermakers',   '27-7',  6,  'Big Ten'],
+    [4,  'North Carolina',    '🐏', 'Tar Heels',      '26-8',  12, 'ACC'],
+    [5,  'San Diego St.',     '🦅', 'Aztecs',         '25-9',  17, 'MWC'],
+    [6,  'Ole Miss',          '🐻', 'Rebels',         '23-11', 20, 'SEC'],
+    [7,  'Virginia',          '🦁', 'Cavaliers',      '23-11', 30, 'ACC'],
+    [8,  'Utah',              '🦅', 'Utes',           '22-12', 35, 'Pac-12'],
+    [9,  'Michigan',          '🐺', 'Wolverines',     '22-12', 39, 'Big Ten'],
+    [10, 'Nebraska',          '🌽', 'Cornhuskers',    '21-13', 45, 'Big Ten'],
+    [11, 'Xavier',            '🔵', 'Musketeers',     '22-13', 48, 'Big East'],
+    [12, 'Grand Canyon',      '🦁', 'Antelopes',      '26-8',  57, 'WAC'],
+    [13, 'Oral Roberts',      '🦅', 'Golden Eagles',  '27-7',  67, 'Summit'],
+    [14, 'Morehead St.',      '�eagle', 'Eagles',      '25-10', 81, 'OVC'],
+    [15, 'Western Kentucky',  '🌟', 'Hilltoppers',    '24-11', 94, 'CUSA'],
+    [16, 'Manhattan',         '🗽', 'Jaspers',        '20-15', 113,'MAAC'],
+  ],
+};
+
+// Fix Morehead St emoji issue
+TEAMS_BY_REGION.Midwest[13][2] = '🦅';
+
+// ════════════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════════════
+// bracket[regionIdx][roundIdx][matchupIdx] = {top: teamIdx|null, bot: teamIdx|null, winner: 0|1|null}
+// teamIdx references TEAMS_BY_REGION[region][i]
+// For FF and Championship we store separately
+
+let showMascots = true;
+let modalTarget = null; // {region, round, matchup, slot}
+
+// Bracket state: stores winner index per matchup
+// State: regions[4] -> rounds[4 = R64,R32,S16,E8] -> matchups[8,4,2,1] -> {teams:[t,t], winner:null}
+let state = {};
+
+function initState() {
+  state = {
+    regions: {},
+    finalFour: [
+      { teams: [null, null], winner: null }, // East vs Midwest (left FF)
+      { teams: [null, null], winner: null }, // West vs South (right FF)
+    ],
+    championship: { teams: [null, null], winner: null },
+  };
+  REGIONS.forEach(region => {
+    state.regions[region] = [
+      // R64: 8 matchups
+      Array.from({length: 8}, () => ({ teams: [null, null], winner: null })),
+      // R32: 4 matchups
+      Array.from({length: 4}, () => ({ teams: [null, null], winner: null })),
+      // Sweet 16: 2 matchups
+      Array.from({length: 2}, () => ({ teams: [null, null], winner: null })),
+      // Elite 8: 1 matchup
+      Array.from({length: 1}, () => ({ teams: [null, null], winner: null })),
+    ];
+    // Seed R64
+    const teams = TEAMS_BY_REGION[region];
+    // Standard NCAA bracket seeding matchups: 1v16, 8v9, 5v12, 4v13, 6v11, 3v14, 7v10, 2v15
+    const seedPairs = [[0,15],[7,8],[4,11],[3,12],[5,10],[2,13],[6,9],[1,14]];
+    seedPairs.forEach(([a, b], i) => {
+      state.regions[region][0][i].teams = [teams[a], teams[b]];
+    });
+  });
+}
+
+function getRegionWinner(region) {
+  const e8 = state.regions[region][3][0];
+  if (e8.winner === null) return null;
+  return e8.teams[e8.winner];
+}
+
+function getFFWinner(ffIdx) {
+  const ff = state.finalFour[ffIdx];
+  if (ff.winner === null) return null;
+  return ff.teams[ff.winner];
+}
+
+// ════════════════════════════════════════════════
+//  RENDER
+// ════════════════════════════════════════════════
+function render() {
+  const grid = document.getElementById('bracketGrid');
+  grid.innerHTML = '';
+
+  // Left side: East (col 0-1), West (col 0-1 stacked)?
+  // Layout: [East R64..E8] [West R64..E8] [FinalFour+Champ] [South E8..R64] [Midwest E8..R64]
+  // Actually NCAA layout: Left half = East+West feeding into left FF slot
+  // Right half = South+Midwest feeding into right FF slot
+  // We do: East (left to right), West (left to right) | FF | South (right to left), Midwest (right to left)
+
+  // Col 1: East region (left side, reads left→right)
+  const eastCol = buildRegionHTML('East', 'left');
+  // Col 2: West region (left side, reads left→right) -- stacked below East
+  const westCol = buildRegionHTML('West', 'left');
+
+  // Col 3: Final Four + Championship
+  const ffCol = buildFinalFourHTML();
+
+  // Col 4: South region (right side, reads right→left)
+  const southCol = buildRegionHTML('South', 'right');
+  // Col 5: Midwest region (right side)
+  const midwestCol = buildRegionHTML('Midwest', 'right');
+
+  // We use a 2x2 + center layout
+  // Actually render as 5-column grid: leftRegions | FF | rightRegions
+  // Left regions = East top, West bottom (each 4 rounds)
+  // Right regions = South top, Midwest bottom
+
+  const leftDiv = document.createElement('div');
+  leftDiv.style.cssText = 'display:flex;flex-direction:column;gap:8px;';
+  leftDiv.appendChild(eastCol);
+  leftDiv.appendChild(westCol);
+
+  const rightDiv = document.createElement('div');
+  rightDiv.style.cssText = 'display:flex;flex-direction:column;gap:8px;';
+  rightDiv.appendChild(southCol);
+  rightDiv.appendChild(midwestCol);
+
+  grid.appendChild(leftDiv);
+  grid.appendChild(ffCol);
+  grid.appendChild(rightDiv);
+
+  grid.style.display = 'flex';
+  grid.style.gap = '0';
+  grid.style.alignItems = 'center';
+
+  attachListeners();
+}
+
+function buildRegionHTML(region, side) {
+  const wrapper = document.createElement('div');
+  wrapper.className = `region-wrapper region-${region.toLowerCase()}`;
+  wrapper.style.flex = '1';
+
+  const header = document.createElement('div');
+  header.className = 'region-header';
+  header.textContent = `${region} Region`;
+  wrapper.appendChild(header);
+
+  const roundsRow = document.createElement('div');
+  roundsRow.className = `rounds-row ${side === 'right' ? 'right-side' : ''}`;
+
+  const roundNames = ['First Round', 'Round of 32', 'Sweet 16', 'Elite Eight'];
+  const roundClasses = ['r64', 'r32', 's16', 'e8'];
+  const matchupsPerRound = [8, 4, 2, 1];
+
+  for (let r = 0; r < 4; r++) {
+    const col = document.createElement('div');
+    col.className = `round-col ${roundClasses[r]}`;
+
+    const hdr = document.createElement('div');
+    hdr.className = 'round-header';
+    hdr.textContent = roundNames[r];
+    col.appendChild(hdr);
+
+    const list = document.createElement('div');
+    list.className = 'matchups-list';
+
+    const roundMatchups = state.regions[region][r];
+    for (let m = 0; m < matchupsPerRound[r]; m++) {
+      if (m > 0) {
+        const sp = document.createElement('div');
+        sp.className = 'matchup-spacer';
+        list.appendChild(sp);
+      }
+      const mu = roundMatchups[m];
+      const muEl = buildMatchupEl(mu, region, r, m, side);
+      list.appendChild(muEl);
+    }
+
+    col.appendChild(list);
+    roundsRow.appendChild(col);
+  }
+
+  wrapper.appendChild(roundsRow);
+  return wrapper;
+}
+
+function buildMatchupEl(mu, region, round, matchupIdx, side) {
+  const div = document.createElement('div');
+  div.className = 'matchup';
+  div.dataset.region = region;
+  div.dataset.round = round;
+  div.dataset.matchup = matchupIdx;
+  div.dataset.side = side;
+
+  for (let slot = 0; slot < 2; slot++) {
+    const team = mu.teams[slot];
+    const slotEl = buildTeamSlot(team, mu, slot, region, round, matchupIdx, 'region');
+    div.appendChild(slotEl);
+  }
+  return div;
+}
+
+function buildTeamSlot(team, mu, slot, region, round, matchupIdx, type) {
+  const el = document.createElement('div');
+  el.className = 'team-slot';
+
+  if (!team) {
+    el.classList.add('empty');
+    el.innerHTML = '<span class="team-name">TBD</span>';
+    return el;
+  }
+
+  const isWinner = mu.winner === slot;
+  const isLoser = mu.winner !== null && mu.winner !== slot;
+
+  if (isWinner) el.classList.add('winner');
+  if (isLoser) el.classList.add('loser');
+
+  el.dataset.type = type;
+  el.dataset.region = region || '';
+  el.dataset.round = round !== undefined ? round : '';
+  el.dataset.matchup = matchupIdx !== undefined ? matchupIdx : '';
+  el.dataset.slot = slot;
+  el.dataset.teamname = team[1];
+
+  const seed = document.createElement('div');
+  seed.className = 'seed';
+  seed.textContent = team[0];
+
+  const mascot = document.createElement('span');
+  mascot.className = 'mascot-emoji';
+  mascot.textContent = showMascots ? team[2] : '';
+  mascot.style.display = showMascots ? '' : 'none';
+
+  const name = document.createElement('div');
+  name.className = 'team-name';
+  name.textContent = team[1];
+
+  el.appendChild(seed);
+  el.appendChild(mascot);
+  el.appendChild(name);
+
+  // tooltip
+  el.addEventListener('mouseenter', (e) => showTooltip(e, team));
+  el.addEventListener('mouseleave', () => hideTooltip());
+  el.addEventListener('mousemove', (e) => moveTooltip(e));
+
+  return el;
+}
+
+function buildFinalFourHTML() {
+  const col = document.createElement('div');
+  col.className = 'final-four-col';
+  col.style.cssText = 'min-width:190px;display:flex;flex-direction:column;align-items:center;padding:0 10px;';
+
+  // Header
+  const hdr = document.createElement('div');
+  hdr.className = 'ff-header';
+  hdr.textContent = 'Final Four · Championship';
+  col.appendChild(hdr);
+
+  // FF Game 1 (East vs Midwest winner)
+  const ff1 = buildFFMatchup(0, 'East', 'Midwest');
+  col.appendChild(ff1);
+
+  // Championship
+  const champArea = document.createElement('div');
+  champArea.className = 'champion-area';
+  champArea.innerHTML = '<div class="champion-trophy">🏆</div><div class="champion-label">2026 Champion</div>';
+
+  const champSlot = document.createElement('div');
+  champSlot.className = 'champion-slot';
+  champSlot.dataset.type = 'champion';
+  champSlot.dataset.slot = '0';
+
+  const champ = state.championship;
+  if (champ.winner !== null && champ.teams[champ.winner]) {
+    const t = champ.teams[champ.winner];
+    champSlot.innerHTML = `<div class="seed" style="background:var(--ncaa-gold);color:#1a1a00">${t[0]}</div><span style="font-size:1.1rem">${showMascots ? t[2] : ''}</span><div class="team-name" style="font-size:0.78rem;font-weight:900;color:var(--ncaa-blue)">${t[1]}</div>`;
+  } else {
+    const empty = state.championship.teams.some(t => t !== null);
+    if (state.championship.teams[0] || state.championship.teams[1]) {
+      // show both contenders
+      const t0 = state.championship.teams[0];
+      const t1 = state.championship.teams[1];
+      champSlot.innerHTML = `<div class="team-name" style="font-size:0.7rem;color:var(--muted);text-align:center">${t0 ? t0[1] : 'TBD'} vs ${t1 ? t1[1] : 'TBD'}</div>`;
+    } else {
+      champSlot.innerHTML = '<div class="team-name" style="color:var(--muted);text-align:center">Champion TBD</div>';
+    }
+  }
+
+  champArea.appendChild(champSlot);
+  col.appendChild(champArea);
+
+  // FF Game 2 (West vs South winner)
+  const ff2 = buildFFMatchup(1, 'West', 'South');
+  col.appendChild(ff2);
+
+  return col;
+}
+
+function buildFFMatchup(ffIdx, region1, region2) {
+  const ff = state.finalFour[ffIdx];
+
+  // Update teams from region winners
+  ff.teams[0] = getRegionWinner(region1);
+  ff.teams[1] = getRegionWinner(region2);
+
+  const wrap = document.createElement('div');
+  wrap.className = 'ff-matchup-area';
+  wrap.style.cssText = 'width:100%;margin:8px 0;';
+
+  const label = document.createElement('div');
+  label.style.cssText = 'font-size:0.58rem;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);text-align:center;margin-bottom:4px;';
+  label.textContent = `${region1} vs ${region2}`;
+  wrap.appendChild(label);
+
+  for (let slot = 0; slot < 2; slot++) {
+    const team = ff.teams[slot];
+    const isWinner = ff.winner === slot;
+    const isLoser = ff.winner !== null && ff.winner !== slot;
+
+    const slotEl = document.createElement('div');
+    slotEl.className = 'team-slot';
+    if (isWinner) slotEl.classList.add('winner');
+    if (isLoser) slotEl.classList.add('loser');
+    if (!team) slotEl.classList.add('empty');
+
+    slotEl.dataset.type = 'ff';
+    slotEl.dataset.ffIdx = ffIdx;
+    slotEl.dataset.slot = slot;
+
+    if (team) {
+      slotEl.dataset.teamname = team[1];
+      const seed = document.createElement('div');
+      seed.className = 'seed';
+      seed.textContent = team[0];
+      const mascot = document.createElement('span');
+      mascot.className = 'mascot-emoji';
+      mascot.textContent = showMascots ? team[2] : '';
+      mascot.style.display = showMascots ? '' : 'none';
+      const name = document.createElement('div');
+      name.className = 'team-name';
+      name.textContent = team[1];
+      slotEl.appendChild(seed);
+      slotEl.appendChild(mascot);
+      slotEl.appendChild(name);
+      slotEl.addEventListener('mouseenter', (e) => showTooltip(e, team));
+      slotEl.addEventListener('mouseleave', () => hideTooltip());
+      slotEl.addEventListener('mousemove', (e) => moveTooltip(e));
+    } else {
+      slotEl.innerHTML = `<span class="team-name">${slot === 0 ? region1 : region2} Winner</span>`;
+    }
+    wrap.appendChild(slotEl);
+  }
+  return wrap;
+}
+
+// ════════════════════════════════════════════════
+//  EVENT HANDLING
+// ════════════════════════════════════════════════
+function attachListeners() {
+  document.querySelectorAll('.team-slot:not(.empty):not(.placeholder)').forEach(el => {
+    el.addEventListener('click', handleSlotClick);
+  });
+}
+
+function handleSlotClick(e) {
+  const el = e.currentTarget;
+  const type = el.dataset.type;
+
+  if (type === 'region') {
+    const region = el.dataset.region;
+    const round = parseInt(el.dataset.round);
+    const matchupIdx = parseInt(el.dataset.matchup);
+    const slot = parseInt(el.dataset.slot);
+    advanceTeam(region, round, matchupIdx, slot);
+  } else if (type === 'ff') {
+    const ffIdx = parseInt(el.dataset.ffIdx);
+    const slot = parseInt(el.dataset.slot);
+    advanceFFTeam(ffIdx, slot);
+  } else if (type === 'champion') {
+    // toggle champion
+  }
+}
+
+function advanceTeam(region, round, matchupIdx, slot) {
+  const mu = state.regions[region][round][matchupIdx];
+  const team = mu.teams[slot];
+  if (!team) return;
+
+  // Toggle: if already winner, undo advancement
+  if (mu.winner === slot) {
+    // undo: clear this and all downstream
+    mu.winner = null;
+    clearDownstream(region, round, matchupIdx);
+    render();
+    return;
+  }
+
+  mu.winner = slot;
+
+  // Propagate winner to next round
+  if (round < 3) {
+    const nextMatchup = Math.floor(matchupIdx / 2);
+    const nextSlot = matchupIdx % 2;
+    const nextMu = state.regions[region][round + 1][nextMatchup];
+
+    // If there was already someone there (different team), clear downstream
+    if (nextMu.teams[nextSlot] && nextMu.teams[nextSlot][1] !== team[1]) {
+      nextMu.winner = null;
+      clearDownstream(region, round + 1, nextMatchup);
+    }
+    nextMu.teams[nextSlot] = team;
+  }
+
+  // If Elite 8, update Final Four
+  if (round === 3) {
+    updateFinalFour();
+  }
+
+  render();
+}
+
+function clearDownstream(region, round, matchupIdx) {
+  for (let r = round; r < 4; r++) {
+    const numMatchups = [8, 4, 2, 1][r];
+    if (r === round) {
+      const mu = state.regions[region][r][matchupIdx];
+      mu.winner = null;
+      // clear next round's slot fed by this
+      if (r < 3) {
+        const nextM = Math.floor(matchupIdx / 2);
+        const nextS = matchupIdx % 2;
+        state.regions[region][r + 1][nextM].teams[nextS] = null;
+        state.regions[region][r + 1][nextM].winner = null;
+      }
+    } else {
+      // clear whole round downstream from matchupIdx
+      const startM = Math.floor(matchupIdx / Math.pow(2, r - round));
+      const endM = startM;
+      const mu2 = state.regions[region][r][startM] || state.regions[region][r][endM];
+      if (mu2) {
+        mu2.winner = null;
+        if (r < 3) {
+          const nextM = Math.floor(startM / 2);
+          const nextS = startM % 2;
+          if (state.regions[region][r + 1][nextM]) {
+            state.regions[region][r + 1][nextM].teams[nextS] = null;
+            state.regions[region][r + 1][nextM].winner = null;
+          }
+        }
+      }
+    }
+    matchupIdx = Math.floor(matchupIdx / 2);
+  }
+  updateFinalFour();
+}
+
+function updateFinalFour() {
+  // FF[0]: East vs Midwest
+  const eastWin = getRegionWinner('East');
+  const midwestWin = getRegionWinner('Midwest');
+  const prevE = state.finalFour[0].teams[0];
+  const prevMW = state.finalFour[0].teams[1];
+
+  if (eastWin !== prevE || midwestWin !== prevMW) {
+    if ((prevE && eastWin && prevE[1] !== eastWin[1]) ||
+        (prevMW && midwestWin && prevMW[1] !== midwestWin[1]) ||
+        (!eastWin && prevE) || (!midwestWin && prevMW)) {
+      state.finalFour[0].winner = null;
+      clearChampSlot(0);
+    }
+    state.finalFour[0].teams = [eastWin, midwestWin];
+  }
+
+  // FF[1]: West vs South
+  const westWin = getRegionWinner('West');
+  const southWin = getRegionWinner('South');
+  const prevW = state.finalFour[1].teams[0];
+  const prevS = state.finalFour[1].teams[1];
+
+  if (westWin !== prevW || southWin !== prevS) {
+    if ((prevW && westWin && prevW[1] !== westWin[1]) ||
+        (prevS && southWin && prevS[1] !== southWin[1]) ||
+        (!westWin && prevW) || (!southWin && prevS)) {
+      state.finalFour[1].winner = null;
+      clearChampSlot(1);
+    }
+    state.finalFour[1].teams = [westWin, southWin];
+  }
+
+  // Update championship
+  const ff0win = state.finalFour[0].winner !== null ? state.finalFour[0].teams[state.finalFour[0].winner] : null;
+  const ff1win = state.finalFour[1].winner !== null ? state.finalFour[1].teams[state.finalFour[1].winner] : null;
+  state.championship.teams = [ff0win, ff1win];
+  if (state.championship.winner !== null) {
+    const champTeam = state.championship.teams[state.championship.winner];
+    if (!champTeam) state.championship.winner = null;
+  }
+}
+
+function clearChampSlot(ffIdx) {
+  const ff = state.finalFour[ffIdx];
+  // Determine which championship slot this feeds
+  const champSlot = ffIdx; // 0 = left finalist, 1 = right finalist
+  const champTeam = state.championship.teams[champSlot];
+  const ffWinner = ff.winner !== null ? ff.teams[ff.winner] : null;
+  if (champTeam && (!ffWinner || champTeam[1] !== ffWinner[1])) {
+    state.championship.teams[champSlot] = null;
+    state.championship.winner = null;
+  }
+}
+
+function advanceFFTeam(ffIdx, slot) {
+  const ff = state.finalFour[ffIdx];
+  const team = ff.teams[slot];
+  if (!team) return;
+
+  if (ff.winner === slot) {
+    ff.winner = null;
+    state.championship.teams[ffIdx] = null;
+    state.championship.winner = null;
+    render();
+    return;
+  }
+
+  ff.winner = slot;
+  state.championship.teams[ffIdx] = team;
+  if (state.championship.winner !== null) {
+    const champTeam = state.championship.teams[state.championship.winner];
+    if (!champTeam || champTeam[1] !== team[1]) {
+      state.championship.winner = null;
+    }
+  }
+  render();
+}
+
+// ════════════════════════════════════════════════
+//  RANDOM BRACKET
+// ════════════════════════════════════════════════
+function randomizeBracket() {
+  initState();
+
+  REGIONS.forEach(region => {
+    for (let r = 0; r < 4; r++) {
+      const matchups = state.regions[region][r];
+      matchups.forEach((mu, mIdx) => {
+        if (mu.teams[0] && mu.teams[1]) {
+          // Weight by seed (lower seed = better team = higher chance)
+          const s0 = mu.teams[0][0];
+          const s1 = mu.teams[1][0];
+          const total = s0 + s1;
+          // Lower seed number = better, so inverse weight
+          const prob0 = (total - s0 + 2) / (total + 4);
+          const winner = Math.random() < prob0 ? 0 : 1;
+          mu.winner = winner;
+
+          // Propagate
+          if (r < 3) {
+            const nextM = Math.floor(mIdx / 2);
+            const nextS = mIdx % 2;
+            state.regions[region][r + 1][nextM].teams[nextS] = mu.teams[winner];
+          }
+        }
+      });
+    }
+  });
+
+  updateFinalFour();
+
+  // FF
+  [0, 1].forEach(ffIdx => {
+    const ff = state.finalFour[ffIdx];
+    if (ff.teams[0] && ff.teams[1]) {
+      const s0 = ff.teams[0][0];
+      const s1 = ff.teams[1][0];
+      const total = s0 + s1;
+      const prob0 = (total - s0 + 2) / (total + 4);
+      ff.winner = Math.random() < prob0 ? 0 : 1;
+      state.championship.teams[ffIdx] = ff.teams[ff.winner];
+    }
+  });
+
+  // Championship
+  const champ = state.championship;
+  if (champ.teams[0] && champ.teams[1]) {
+    const s0 = champ.teams[0][0];
+    const s1 = champ.teams[1][0];
+    const total = s0 + s1;
+    const prob0 = (total - s0 + 2) / (total + 4);
+    champ.winner = Math.random() < prob0 ? 0 : 1;
+  }
+
+  render();
+}
+
+function resetBracket() {
+  initState();
+  render();
+}
+
+function toggleMascots() {
+  showMascots = !showMascots;
+  render();
+}
+
+// ════════════════════════════════════════════════
+//  TOOLTIP
+// ════════════════════════════════════════════════
+function showTooltip(e, team) {
+  const tip = document.getElementById('tooltip');
+  tip.textContent = `${team[2]} ${team[1]} (${team[6]}) — ${team[4]} • KP Rank: #${team[5]}`;
+  tip.classList.add('visible');
+  moveTooltip(e);
+}
+function moveTooltip(e) {
+  const tip = document.getElementById('tooltip');
+  tip.style.left = (e.clientX + 12) + 'px';
+  tip.style.top = (e.clientY - 28) + 'px';
+}
+function hideTooltip() {
+  document.getElementById('tooltip').classList.remove('visible');
+}
+
+// ════════════════════════════════════════════════
+//  MODAL (right-click for team detail)
+// ════════════════════════════════════════════════
+function closeModal() {
+  document.getElementById('teamModal').classList.remove('open');
+}
+function advanceFromModal() {
+  closeModal();
+  if (modalTarget) {
+    const {type, region, round, matchupIdx, slot, ffIdx} = modalTarget;
+    if (type === 'region') advanceTeam(region, round, matchupIdx, slot);
+    else if (type === 'ff') advanceFFTeam(ffIdx, slot);
+  }
+}
+
+document.addEventListener('contextmenu', (e) => {
+  const slot = e.target.closest('.team-slot:not(.empty)');
+  if (!slot) return;
+  e.preventDefault();
+
+  const teamName = slot.dataset.teamname;
+  if (!teamName) return;
+
+  // Find team data
+  let teamData = null;
+  for (const region of REGIONS) {
+    for (const t of TEAMS_BY_REGION[region]) {
+      if (t[1] === teamName) { teamData = t; break; }
+    }
+    if (teamData) break;
+  }
+  if (!teamData) return;
+
+  document.getElementById('modalMascot').textContent = teamData[2];
+  document.getElementById('modalName').textContent = teamData[1];
+  document.getElementById('modalSub').textContent = `${teamData[6]} • ${teamData[3]}`;
+  document.getElementById('modalStats').innerHTML = `
+    <div class="stat-box"><div class="stat-label">Seed</div><div class="stat-value">#${teamData[0]}</div></div>
+    <div class="stat-box"><div class="stat-label">Record</div><div class="stat-value">${teamData[4]}</div></div>
+    <div class="stat-box"><div class="stat-label">KenPom Rank</div><div class="stat-value">#${teamData[5]}</div></div>
+    <div class="stat-box"><div class="stat-label">Mascot</div><div class="stat-value">${teamData[2]} ${teamData[3]}</div></div>
+  `;
+
+  modalTarget = {
+    type: slot.dataset.type,
+    region: slot.dataset.region,
+    round: parseInt(slot.dataset.round),
+    matchupIdx: parseInt(slot.dataset.matchup),
+    slot: parseInt(slot.dataset.slot),
+    ffIdx: parseInt(slot.dataset.ffIdx),
+  };
+
+  document.getElementById('teamModal').classList.add('open');
+});
+
+document.getElementById('teamModal').addEventListener('click', (e) => {
+  if (e.target === document.getElementById('teamModal')) closeModal();
+});
+
+// ════════════════════════════════════════════════
+//  INIT
+// ════════════════════════════════════════════════
+initState();
+render();
+</script>
+</body>
+</html>
