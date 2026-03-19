@@ -863,8 +863,8 @@ function initState() {
   state = {
     regions: {},
     finalFour: [
-      { teams: [null, null], winner: null }, // East vs Midwest (left FF)
-      { teams: [null, null], winner: null }, // West vs South (right FF)
+      { teams: [null, null], winner: null }, // East vs South (left FF)
+      { teams: [null, null], winner: null }, // West vs Midwest (right FF)
     ],
     championship: { teams: [null, null], winner: null },
     tiebreakerScore: '',
@@ -1073,8 +1073,8 @@ function buildFinalFourHTML() {
   hdr.textContent = 'Final Four · Championship';
   col.appendChild(hdr);
 
-  // FF Game 1 (East vs Midwest winner)
-  const ff1 = buildFFMatchup(0, 'East', 'Midwest');
+  // FF Game 1 (East vs South winner)
+  const ff1 = buildFFMatchup(0, 'East', 'South');
   col.appendChild(ff1);
 
   // Championship
@@ -1126,8 +1126,8 @@ function buildFinalFourHTML() {
 
   col.appendChild(champArea);
 
-  // FF Game 2 (West vs South winner)
-  const ff2 = buildFFMatchup(1, 'West', 'South');
+  // FF Game 2 (West vs Midwest winner)
+  const ff2 = buildFFMatchup(1, 'West', 'Midwest');
   col.appendChild(ff2);
 
   return col;
