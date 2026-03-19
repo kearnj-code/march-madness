@@ -392,6 +392,12 @@
     font-weight: 900;
     color: var(--ncaa-blue);
   }
+  .champion-matchup .team-slot.champion-loser {
+    opacity: 0.5;
+  }
+  .champion-matchup .team-slot.champion-loser .team-name {
+    text-decoration: line-through;
+  }
 
   .tiebreaker-area {
     display: flex;
@@ -1086,7 +1092,8 @@ function buildFinalFourHTML() {
       const t = champ.teams[i];
       const slot = document.createElement('div');
       const isWinner = champ.winner === i;
-      slot.className = 'team-slot' + (isWinner ? ' winner champion-winner' : '') + (!t ? ' empty placeholder' : '');
+      const isLoser = champ.winner !== null && !isWinner;
+      slot.className = 'team-slot' + (isWinner ? ' winner champion-winner' : '') + (isLoser ? ' champion-loser' : '') + (!t ? ' empty placeholder' : '');
       slot.dataset.type = 'champion';
       slot.dataset.slot = String(i);
       if (t) {
