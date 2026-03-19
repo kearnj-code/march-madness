@@ -915,32 +915,25 @@ function render() {
   // Right half = South+Midwest feeding into right FF slot
   // We do: East (left to right), West (left to right) | FF | South (right to left), Midwest (right to left)
 
-  // Col 1: East region (left side, reads left→right)
+  // Left side: East (top) + South (bottom), reads left→right
   const eastCol = buildRegionHTML('East', 'left');
-  // Col 2: West region (left side, reads left→right) -- stacked below East
-  const westCol = buildRegionHTML('West', 'left');
+  const southCol = buildRegionHTML('South', 'left');
 
   // Col 3: Final Four + Championship
   const ffCol = buildFinalFourHTML();
 
-  // Col 4: South region (right side, reads right→left)
-  const southCol = buildRegionHTML('South', 'right');
-  // Col 5: Midwest region (right side)
+  // Right side: West (top) + Midwest (bottom), reads right→left
+  const westCol = buildRegionHTML('West', 'right');
   const midwestCol = buildRegionHTML('Midwest', 'right');
-
-  // We use a 2x2 + center layout
-  // Actually render as 5-column grid: leftRegions | FF | rightRegions
-  // Left regions = East top, West bottom (each 4 rounds)
-  // Right regions = South top, Midwest bottom
 
   const leftDiv = document.createElement('div');
   leftDiv.style.cssText = 'display:flex;flex-direction:column;gap:8px;';
   leftDiv.appendChild(eastCol);
-  leftDiv.appendChild(westCol);
+  leftDiv.appendChild(southCol);
 
   const rightDiv = document.createElement('div');
   rightDiv.style.cssText = 'display:flex;flex-direction:column;gap:8px;';
-  rightDiv.appendChild(southCol);
+  rightDiv.appendChild(westCol);
   rightDiv.appendChild(midwestCol);
 
   grid.appendChild(leftDiv);
